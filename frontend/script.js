@@ -3,6 +3,8 @@ const BASE = "https://hrms-lite-production-fe09.up.railway.app";
 const EMP_API = `${BASE}/api/employees`;
 const ATT_API = `${BASE}/api/attendance`;
 
+
+
 // ===== LOAD EMPLOYEES =====
 async function loadEmployees() {
   try {
