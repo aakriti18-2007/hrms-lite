@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HRMS Lite - Login</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.login-box{
+  background:white;
+  padding:30px;
+  width:300px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+h2{text-align:center;}
+input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+button{
+  background:#007bff;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+button:hover{background:#0056b3;}
+.error{color:red;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>HRMS Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p class="error" id="error"></p>
+</div>
+
+<script>
+function login(){
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+
+  if(u === "admin" && p === "1234"){
+    window.location.href = "index.htm";
+
+
+
+  } else {
+    document.getElementById("error").innerText = "Invalid login!";
+  }
+}
+</script>
+
+</body>
+</html>

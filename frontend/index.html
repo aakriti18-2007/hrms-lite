@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HRMS Lite</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;padding:20px}
+h1,h2{text-align:center}
+form,input,select,button{margin:5px;padding:8px}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:white}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+button{background:#007bff;color:white;border:none;cursor:pointer}
+button:hover{background:#0056b3}
+</style>
+</head>
+<body>
+
+<h1>HRMS Lite</h1>
+
+<!-- EMPLOYEE -->
+<h2>Add Employee</h2>
+<form id="employeeForm">
+  <input id="empIdInput" placeholder="Employee ID" required>
+  <input id="fullNameInput" placeholder="Full Name" required>
+  <input id="emailInput" placeholder="Email" required>
+  <input id="departmentInput" placeholder="Department" required>
+  <button type="submit">Add Employee</button>
+</form>
+
+<h2>Employee List</h2>
+<table>
+<thead>
+<tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr>
+</thead>
+<tbody id="empTable"></tbody>
+</table>
+
+<hr>
+
+<!-- ATTENDANCE -->
+<h2>Mark Attendance</h2>
+<form id="attendanceForm">
+  <select id="empSelect" required></select>
+  <input type="date" id="attDate" required>
+  <select id="status" required>
+    <option value="">Select</option>
+    <option value="Present">Present</option>
+    <option value="Absent">Absent</option>
+  </select>
+  <button type="submit">Mark Attendance</button>
+</form>
+
+<h2>Attendance Records</h2>
+<table>
+<thead>
+<tr><th>Employee</th><th>Date</th><th>Status</th></tr>
+</thead>
+<tbody id="attTable"></tbody>
+</table>
+
+<script>
+const EMP_API = "https://<your-railway-app>.up.railway.app/api/employees";
+const ATT_API = "https://<your-railway-app>.up.railway.app/api/attendance";
+
+
+// ===== INIT LOAD =====
+window.onload = () => {
+  fetchEmployees();
+  fetchAttendance();
+};
+
+// ===== EMPLOYEES =====
+async function fetchEmployees(){
+  try{
+    const res = await fetch(EMP_API);
+    const data = await res.json();
+    const table = document.getElementById("empTable");
+    const select = document.getElementById("empSelect");
+    table.innerHTML = "";
+    select.innerHTML = "<option value=''>Select Employee</option>";
+    data.forEach(e=>{
+      table.innerHTML += `
+        <tr>
+          <td>${e.empId}</td>
+          <td>${e.fullName}</td>
+          <td>${e.email}</td>
+          <td>${e.department}</td>
+          <td><button onclick="deleteEmployee('${e._id}')">Delete</button></td>
+        </tr>`;
+      select.innerHTML += `<option value="${e._id}">${e.fullName}</option>`;
+    });
+  }catch(err){ console.error(err); alert("Error loading employees"); }
+}
+
+// ===== ADD EMPLOYEE =====
+document.getElementById("employeeForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const empId = document.getElementById("empIdInput").value.trim();
+  const fullName = document.getElementById("fullNameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const department = document.getElementById("departmentInput").value.trim();
+  if(!empId || !fullName || !email || !department){ alert("Fill all fields"); return; }
+  try{
+    const res = await fetch(`${EMP_API}/add`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({empId, fullName, email, department})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || "Error adding employee");
+    alert("Employee added!");
+    document.getElementById("employeeForm").reset();
+    fetchEmployees();
+  }catch(err){ console.error(err); alert(err.message); }
+});
+
+// ===== DELETE EMPLOYEE =====
+async function deleteEmployee(id){
+  if(!confirm("Are you sure you want to delete this employee?")) return;
+  try{
+    const res = await fetch(`${EMP_API}/delete?id=${id}`, { method:"DELETE" });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || "Error deleting employee");
+    alert("Employee deleted!");
+    fetchEmployees();
+  }catch(err){ console.error(err); alert(err.message); }
+}
+
+// ===== ATTENDANCE =====
+async function fetchAttendance(){
+  try{
+    const res = await fetch(ATT_API);
+    const data = await res.json();
+    const table = document.getElementById("attTable");
+    table.innerHTML = "";
+    data.forEach(a=>{
+      table.innerHTML += `
+        <tr>
+          <td>${a.employee?.fullName || "N/A"}</td>
+          <td>${a.date}</td>
+          <td>${a.status}</td>
+        </tr>`;
+    });
+  }catch(err){ console.error(err); alert("Error loading attendance"); }
+}
+
+// ===== MARK ATTENDANCE =====
+document.getElementById("attendanceForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const employee = document.getElementById("empSelect").value;
+  const date = document.getElementById("attDate").value;
+  const status = document.getElementById("status").value;
+  if(!employee || !date || !status){ alert("Fill all fields"); return; }
+  try{
+    const res = await fetch(`${ATT_API}/add`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({employee, date, status})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || "Error marking attendance");
+    alert("Attendance marked!");
+    document.getElementById("attendanceForm").reset();
+    fetchAttendance();
+  }catch(err){ console.error(err); alert(err.message); }
+});
+</script>
+</body>
+</html>
