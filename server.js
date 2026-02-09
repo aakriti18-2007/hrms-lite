@@ -96,8 +96,9 @@ app.post("/api/attendance/add", async (req,res)=>{
 const frontendPath = path.join(__dirname, "../frontend");
 app.use(express.static(frontendPath));
 app.get("/", (req,res)=>{
-  res.sendFile(path.join(frontendPath, "index_backup.html"));
+  res.json({ message: "HRMS Lite API is running" });
 });
+
 
 // ===== START SERVER =====
 app.listen(PORT, ()=>{
